@@ -1,0 +1,20 @@
+{
+  "name": "coconode",
+  "version": "1.0.0",
+  "description": "Coconut proxy for i2c protocol",
+  "main": "proxy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bleno": "^0.4.1",
+    "express": "^4.14.0",
+    "express-ws": "^2.0.0",
+    "i2c": "^0.2.3",
+    "q": "^1.4.1",
+    "raspi-i2c": "^4.0.0",
+    "serialport": "^4.0.7"
+  }
+}
