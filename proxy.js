@@ -208,7 +208,7 @@ function	getGuiRoot() {
 //		console.info('check "'+process.argv[i]+'"');
 		if ((match = process.argv[i].match(/^--gui=.*$/))) {
 //			console.info('found gui path "', match, '"');
-			var path = __dirname+'/'+match[0].replace('--gui=', '')
+			var path = match[0].replace('--gui=', '')
 //			console.info('returns "'+path+'"');
 			return path;
 			
@@ -218,9 +218,9 @@ function	getGuiRoot() {
 	return __dirname+'/htdocs';
 }
 
-console.info(process.argv);
+var webRoot = getGuiRoot();
 
-app.use('/', express.static(getGuiRoot()));
+app.use('/', express.static(webRoot));
 
 app.use('/bower_components/', express.static(__dirname+'/bower_components/'));
 
@@ -228,15 +228,15 @@ app.all('/*', function(req, res, next) {
 	if (req.originalUrl.indexOf('/bower_components') !== -1)
 		return next();
 	// Just send the index.html for other files to support HTML5Mode
-	res.sendFile('index.html', { root: getGuiRoot() });
+	res.sendFile('index.html', { root: webRoot });
 });
 
 app.use(function(req, res, next) {
 	res.status(404).send('not found');
 });
 
-app.listen(HTTP_PORT, function () {
-	console.log(config.name + ' v' + config.version + ' is listening on port ' + HTTP_PORT);
+app.listen(HTTP_PORT, function() {
+	console.log(config.name + ' v' + config.version + ' is listening on port ' + HTTP_PORT + ' serving files from ' + webRoot);
 });
 
 
