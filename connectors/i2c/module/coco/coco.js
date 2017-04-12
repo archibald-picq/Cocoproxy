@@ -70,6 +70,20 @@ var compiledModules = [
 			return null;
 		}
 	},
+	{
+		code: 0x06,
+		name: 'Linky module',
+		type: ANALOG_OUT,
+		convert: function(buffer) {
+			var iinst = buffer[0];
+			var papp = buffer[2] << 8 | buffer[1];
+//			console.info('conver buffer ', buffer, ' ('+buffer[0]+', '+buffer[1]+') to ', iinst, ' A, ', papp, ' VA');
+			return {
+				iinst: iinst,
+				papp: papp,
+			};
+		}
+	},
 ];
 
 function	parseEvents(buffer) {
@@ -109,7 +123,7 @@ function coconode(client) {
 	client.askName = function askName() {
 		return sendCommand(client, COMMAND_SEND_DEVICE_NAME).then(function(buffer) {
 			client.name = buffer.toString('ascii');
-			console.info('success retreiving name "'+client.name+'"');
+			console.info('success retreiving name "'+client.name+'" (', buffer, ')');
 			client.trigger('update');
 		});
 	};
