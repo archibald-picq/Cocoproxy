@@ -24,7 +24,7 @@ manager.on('device', function(device) {
 	
 	device.on('close', function() {
 		console.info('device.close: ', device.getUniqId());
-		broadcast({clientLost: device.getUniqId()})
+		broadcast({clientLost: device.getUniqId()});
 		manager.remove(device);
 	});
 	device.on('update', function() {

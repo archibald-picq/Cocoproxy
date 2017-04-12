@@ -8,6 +8,10 @@ var pub = new PubSub();
 var devices = [];
 
 function	addDevice(device) {
+	if (findByKey(devices, device.address, 'address') !== null) {
+		console.warn('corrupted call, device ', device.address, ' already exists');
+		return;
+	}
 	pub.trigger('device', device);
 	devices.push(device);
 	
@@ -28,10 +32,14 @@ function	getDevice(address) {
 	return findByKey(devices, address, 'address');
 }
 
-function	removeDevice(address) {
-	var  p = findByKey(devices, address, 'address');
-	if (p !== null)
-		devices.splice(p, 1);
+function	removeDevice(device) {
+	var  p = findByKey(devices, device.getUniqId(), 'address');
+	if (p !== null) {
+		console.info('removing device at index ', devices.indexOf(p));
+		devices.splice(devices.indexOf(p), 1);
+	}
+	else
+		console.warn('device ', address, ' not found');
 }
 
 

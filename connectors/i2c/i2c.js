@@ -47,7 +47,10 @@ if (i2c) {
 						}
 						
 						for (var i=0; i<data.length; i++)
-							create_or_update_client(data[i]);
+							if (data[i])
+								create_or_update_client(data[i]);
+							else
+								console.warn('received invalid device ', data[i]);
 						
 						for (var addr in clients)
 							if (clients.hasOwnProperty(addr) && data.indexOf(clients[addr].address) == -1) {
