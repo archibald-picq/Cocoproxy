@@ -38,7 +38,8 @@ if (i2c) {
 		
 		(function	loop() {
 			try {
-				if (!lastScan || lastScan < new Date() - 5000) {
+				if (!lastScan || lastScan < new Date() - 10000) {
+					// console.warn('scanning ...');
 					wire.scan(function(err, data) {
 						if (err) {console.warn('cant scan i2c bus ', err); return;};
 						if (data.join('|') !== lastScanIds) {
@@ -96,7 +97,10 @@ function	log_client() {
 	var args = arguments;
 	var client = Array.prototype.shift.apply(args);
 	
-	var prefix = '0x'+client.address.toString(16);
+	var prefix = client.address.toString(16);
+	if (prefix.length < 2)
+		prefix = '0'+prefix;
+	prefix = '0x'+prefix;
 	var append = '';
 	if (client.name)
 		append += (append? ', ': '')+client.name;
@@ -119,7 +123,10 @@ function	log_client() {
 }
 function	log_date() {
 	var n = new Date();
-	return (n.getHours() < 10? '0': '')+n.getHours()+':'+(n.getMinutes() < 10? '0': '')+n.getMinutes()+':'+(n.getSeconds() < 10? '0': '')+n.getSeconds()+'.'+n.getMilliseconds();
+	var ms = n.getMilliseconds();
+	while ((''+ms).length < 3)
+		ms = '0'+ms;
+	return (n.getHours() < 10? '0': '')+n.getHours()+':'+(n.getMinutes() < 10? '0': '')+n.getMinutes()+':'+(n.getSeconds() < 10? '0': '')+n.getSeconds()+'.'+ms;
 }
 
 function	is_recent(sensor) {
@@ -190,12 +197,12 @@ function	newClient(addr) {
 			obj.boottime = client.boottime;
 		
 		var sensors = (function(sensors) {
-				var s = {};
-				for (var i in sensors)
-					if (sensors.hasOwnProperty(i))
-						s[i] = {name: sensors[i].name, value: sensors[i].value, type: sensors[i].type};
-				return s;
-			})(client.sensors);
+			var s = {};
+			for (var i in sensors)
+				if (sensors.hasOwnProperty(i))
+					s[i] = {name: sensors[i].name, value: sensors[i].value, type: sensors[i].type};
+			return s;
+		})(client.sensors);
 		
 		if (Object.keys(sensors).length)
 			obj.sensors = sensors;
@@ -219,7 +226,7 @@ function	newClient(addr) {
 				coco.detect(client)
 					.then(function(module) {
 						client.module = module;
-						console.info('device detected as ', client);
+						// console.info('device detected as ', client);
 						client.trigger('update');
 						pub.trigger('update', client);
 						deferred.resolve();
@@ -238,185 +245,6 @@ function	newClient(addr) {
 	return client;
 }
 
-	
-	
-	// // console.info('do nothing with i2c client ', client.address);
-	// return;
-	
-	// // if (addr != 9)
-	// if (!client.name) {
-		// log_client(client, 'ask name to '+client.address);
-		// ask_property(client, 'name', function(err, res) {
-			// if (err) {console.warn(err); return;}
-			// log_client(client, '> received "', res, '"');
-			// clients[addr].name = res;
-			// client.trigger('update');
-			// log_client(client, '> named \'', clients[addr].name, '\'');
-			// then();
-		// });
-	// }
-	// else
-		// then();
-	
-	// function	then() {
-		
-		// // if (!client.build) {
-			// // log_client(client, 'ask build to '+client.address);
-			// // ask_property(client, 'build', function(err, res) {
-				// // if (err) {console.warn(err); return;}
-				// // client.build = res;
-				// // client.trigger('update');
-				// // log_client(client, '> is build \''+res+'\'');
-				// // then2();
-			// // });
-		// // }
-		// // else
-			// then2();
-	// }
-	
-	// function	then2() {
-		// // if (!client.boottime) {
-			// // log_client(client, 'ask boottime to '+client.address);
-			// // ask_property(client, 'boottime', function(err, res) {
-				// // if (res && client.boottime && res < client.boottime) {
-					// // log_client(client, '> has REbooted '+res+' < '+client.boottime);
-					// // client.build = null;
-					// // client.name = null;
-				// // }
-				// // client.boottime = res;
-				// // client.trigger('update');
-				// // var d = new Date();
-				// // d.setTime(d.getTime()-res);
-				// // log_client(client, '> has booted '+reldate(res)+' ago (at '+d+')');
-				// // then3();
-			// // });
-		// // }
-		// // else
-			// then3();
-	// }
-	
-	// function	then3() {
-		// return;
-		
-		// // log_client(client, 'register to client stream ', client);
-		// if (!client.eventRegistered) {
-			// try {
-				// client.eventRegistered = true;
-				// log_client(client, 'register to client stream');
-				
-				// client.eventPoller = (function	poll() {
-					// // if (!poll.poller)
-						// // poll.poller	= {tm:true};
-					// var poller	= {tm:true};
-					// ask_property(client, 'state', function(err, res) {
-						// if (err) {
-							// log_client(client, err);
-							// console.info('client lost');
-							// if (clients[addr].module)
-								// clients[addr].module.destroy();
-							// clients[addr].trigger('close');
-							// // broadcast({clientLost: addr});
-							// delete clients[addr];
-							// // poller.tm = setTimeout(poll, DEVICE_POLLING_INTERVAL);
-							// return ;
-						// }
-						// try {
-							// // log_client(client, 'resp: ', res);
-							// diff_sensors(client, res);
-						
-						// }
-						// catch(e) {
-							// console.warn(e);
-						// }
-						// poller.tm = setTimeout(poll, DEVICE_POLLING_INTERVAL);
-					// });
-					// return poller;
-				// })();
-				
-				// // client.setAddress(addr);
-				// // client.on('data', function(resp) {
-					// // try {
-						// // // log_client(client, 'resp: ', resp);
-						// // diff_sensors(client, resp.data[1]);
-					  // // // result for continuous stream contains resp buffer, address, length, timestamp
-					// // }
-					// // catch(e) {
-						// // console.info(e);
-					// // }
-				// // });
-				
-				// // log_client(client, 'stream from ', client);
-				// // client.stream(45, 2, 100); // continuous stream, delay in ms
-				// // log_client(client, 'streaming from ', client);
-			// }
-			// catch(e) {
-				// console.warn(e);
-			// }
-		// }
-	// }
-// }
-
-// function	set_property(client, values, cb) {
-	// var nextValue = {
-		// d1: typeof values.d1 != 'undefined'? values.d1: client.sensors.d1.value,
-		// d2: typeof values.d2 != 'undefined'? values.d2: client.sensors.d2.value,
-		// d3: typeof values.d3 != 'undefined'? values.d3: client.sensors.d3.value,
-		// d4: typeof values.d4 != 'undefined'? values.d4: client.sensors.d4.value,
-		// d5: typeof values.d5 != 'undefined'? values.d5: client.sensors.d5.value,
-		// d6: typeof values.d6 != 'undefined'? values.d6: client.sensors.d6.value,
-		// d7: typeof values.d7 != 'undefined'? values.d7: client.sensors.d7.value,
-		// d8: typeof values.d8 != 'undefined'? values.d8: client.sensors.d8.value,
-	// };
-	// var value = 0;
-	// if (nextValue.d1)
-		// value += 0x01;
-	// if (nextValue.d2)
-		// value += 0x02;
-	// if (nextValue.d3)
-		// value += 0x04;
-	// if (nextValue.d4)
-		// value += 0x08;
-	// if (nextValue.d5)
-		// value += 0x10;
-	// if (nextValue.d6)
-		// value += 0x20;
-	// if (nextValue.d7)
-		// value += 0x40;
-	// if (nextValue.d8)
-		// value += 0x80;
-	// log_client(client, 'send command '+properties.relay.code+' with value '+value+' from ', values);
-	// client.writeBytes(properties.relay.code, [value, value], function(err, res) {
-		// if (err) {log_client(client, err); cb(err); return ;}
-		// log_client(client, 'order sent, got ', res);
-		// client.readBytes(42, 2, function(err, res) {
-			// if (err) {log_client(client, err); cb(err); return ;}
-			// log_client(client, 'set_bitmask response received ', res);
-			// if (res[0] == 1 || res[0] == 0) {
-				// if (client.error)
-					// log_client(client, '    => retry with success');
-				// delete client.error;
-				// // console.info(client.address+' > [', res, '] ('+properties[name].convert(res)+')');
-				// for (var i in values)
-					// if (values.hasOwnProperty(i))
-						// client.sensors[i].value = values[i];
-				// cb();
-			// }
-			// else {
-				// if (!client.error)
-					// client.error = 0;
-				// client.error++;
-				// if (client.error > 5) {
-					// log_client(client, 'Unsupported response ', res, '');
-					// cb({message: 'Error sending command '+value});
-				// }
-				// else
-					// set_property(client, values, cb);
-			// }
-		// });
-		
-	// });
-// }
-
 function	resp_checksum(buffer) {
 	var chk = 0;
 	for (var i = 0; i < buffer.length; i++) {
@@ -427,18 +255,8 @@ function	resp_checksum(buffer) {
 }
 
 
-// function	set_sensor_value(value) {
-	// var newValue = {};
-	// newValue[params.code] = params.value;
-	// set_property(clients[params.address], newValue, function() {
-		// deferred.resolve(true);
-		// log_client(clients[params.address], 'relay changed');
-	// });
-// }
-
-
-
 module.exports = function(config) {
+	console.info('export herre');
 	return {
 		on: pub.on,
 		unbind: pub.unbind,

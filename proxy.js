@@ -8,6 +8,7 @@ var HTTP_PORT = 8080;
 var manager = require('./src/device-manager');
 
 var i2c = require('./connectors/i2c/i2c')(config);
+var i2cCommand = require('./connectors/i2c/i2c.command');
 i2c.on('device', function(device) {
 	// console.info('i2c device: ', device.dump());
 	manager.add(device);
@@ -147,9 +148,44 @@ var commands = {
 		return deferred.promise;
 	},
 };
+
+var poller = null;
+function	stopStatsPolling() {
+	console.info('stopStatsPolling()');
+	if (!poller)
+		return;
+	clearTimeout(poller);
+	poller = null;
+}
+
+function	startStatsPolling() {
+	console.info('startStatsPolling()');
+	if (poller)
+		return;
+	(function	looper_func() {
+		poller = null;
+		sendI2cStats();
+		poller = setTimeout(looper_func, 1000);
+	})();
+}
+
+function	sendI2cStats() {
+	try {
+		var stats = i2cCommand.getStats();
+		// console.info(stats);
+		broadcast({stats: stats});
+	}
+	catch(e) {
+		console.warn('stats failed : ', e);
+	}
+}
+
+
 app.ws('/', function(ws) {
 	console.info('ws open');
 	httpClients.push(ws);
+	if (httpClients.length === 1)
+		startStatsPolling();
 	ws.on('message', function(msg) {
 		var obj;
 		try {
@@ -187,6 +223,8 @@ app.ws('/', function(ws) {
 		if (p != -1)
 			httpClients.splice(p, 1);
 		console.info('ws close');
+		if (!httpClients.length)
+			stopStatsPolling();
 	});
 });
 
