@@ -1,8 +1,8 @@
 'use strict';
 // var util = require('util');
 
-var PubSub = require('../utils/pubsub');
-var findByKey = require('../utils/find-by-key');
+var PubSub = require('./utils/pubsub');
+var findByKey = require('./utils/find-by-key');
 var pub = new PubSub();
 
 var devices = [];
@@ -39,7 +39,7 @@ function	removeDevice(device) {
 		devices.splice(devices.indexOf(p), 1);
 	}
 	else
-		console.warn('device ', address, ' not found');
+		console.warn('device ', device.getUniqId(), ' not found');
 }
 
 

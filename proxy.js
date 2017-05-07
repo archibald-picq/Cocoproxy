@@ -7,8 +7,8 @@ var HTTP_PORT = 8080;
 
 var manager = require('./src/device-manager');
 
-var i2c = require('./connectors/i2c/i2c')(config);
-var i2cCommand = require('./connectors/i2c/i2c.command');
+var i2c = require('./src/connectors/i2c/i2c')(config);
+var i2cCommand = require('./src/connectors/i2c/i2c.command');
 i2c.on('device', function(device) {
 	// console.info('i2c device: ', device.dump());
 	manager.add(device);
@@ -140,6 +140,22 @@ var commands = {
 			deferred.reject('client '+params.address+' not detected yet');
 		else {
 			client.clearEvents()
+				.then(function(res) {
+					deferred.resolve(res);
+				});
+		}
+		
+		return deferred.promise;
+	},
+	getDefinition: function(ws, params) {
+		var deferred = Q.defer();
+		
+		var client = null;
+		
+		if (!(client = manager.getDevice(params.address)))
+			deferred.reject('client '+params.address+' not detected yet');
+		else {
+			client.getDefinition()
 				.then(function(res) {
 					deferred.resolve(res);
 				});

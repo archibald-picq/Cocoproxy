@@ -153,6 +153,7 @@ function coconode(client) {
 		});
 	};
 	
+	
 	function	refreshSensorValues() {
 		return i2c.sendCommand(client, COMMAND_SEND_EVENT_QUEUE).then(function(buffer) {
 			// console.info('success events of '+buffer.length+' bytes');
@@ -235,7 +236,7 @@ function coconode(client) {
 	function	parseSensor(idx, code) {
 		var module = findByKey(compiledModules, code, 'code');
 		if (!module) {
-			console.warn('unsupported module');
+			console.warn('unsupported module \''+code+'\'');
 			return ;
 		}
 		var key = 'dev'+idx;
@@ -277,7 +278,8 @@ function coconode(client) {
 				}
 				console.info('then ...');
 			});
-	}
+	};
+	client.getDefinition = getModulesDefinition;
 	
 	var tm;
 	var destroyed = false;
