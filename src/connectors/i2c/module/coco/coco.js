@@ -97,7 +97,19 @@ var compiledModules = [
 			}
 //			console.info('conver buffer ', buffer, ' ('+buffer[0]+', '+buffer[1]+') to ', iinst, ' A, ', papp, ' VA');
 			return temps;
-		}
+		},
+	},
+	{
+		code: 0x08,
+		name: 'Switch433',
+		type: DIGITAL_OUT,
+		convert: function(buffer) {
+			// console.info('convert ', buffer);
+			return !!buffer[0];
+		},
+		serialize: function(bool) {
+			return [bool? 0x01: 0x00];
+		},
 	},
 ];
 
